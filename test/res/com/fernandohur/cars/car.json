@@ -1,0 +1,20 @@
+{
+  "class-name": "Car",
+  "package-name": "com.fernandohur.cars",
+  "imports": [],
+  "doc": "A car is a vehicle with four wheels",
+  "attrs": [
+    {
+      "name":"model",
+      "type":"String",
+      "doc":"The car model"
+    },
+    {
+        "name":"fuel",
+        "type":"int",
+        "doc":"The car fuel"
+    }
+  ]
+}
+
+

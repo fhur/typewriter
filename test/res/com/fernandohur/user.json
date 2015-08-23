@@ -1,0 +1,29 @@
+{
+  "class-name": "User",
+  "package-name": "com.fernandohur",
+  "imports": ["java.util.Date"],
+  "doc": "This is the class doc for a User",
+  "attrs": [
+    {
+      "name":"firstName",
+      "type":"String",
+      "doc":"the user's name"
+    },
+    {
+        "name":"lastName",
+        "type":"String",
+        "doc":"The user's last name"
+    },
+    {
+        "name":"married",
+        "type":"boolean",
+        "doc":"Flag indicating if the user is married"
+    },
+    {
+        "name":"birthDay",
+        "type":"Date",
+        "doc":"The user's birth day"
+    }
+  ]
+}
+

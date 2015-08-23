@@ -1,0 +1,15 @@
+{
+  "class-name": "Bike",
+  "package-name": "com.fernandohur.cars",
+  "imports": [],
+  "doc": "A bike is a vehicle with 2 wheels",
+  "attrs": [
+    {
+        "name":"name",
+        "type":"String",
+        "doc":"The bike's name?"
+    }
+  ]
+}
+
+
