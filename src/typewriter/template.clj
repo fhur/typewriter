@@ -10,10 +10,3 @@
         (clojure.string/join ~separator)
         (typewriter.util/indent 0))))
 
-(defmacro
-  test-macro
-  ([a b c d] [a b c d])
-  ([a b c] (test-macro a b c :dummy))
-  ([a b]   (test-macro a b :dummy2)))
-
-
