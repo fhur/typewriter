@@ -10,6 +10,10 @@
     path ; return as it is laready a File
     (File. path)))
 
+(defn mkdirs
+  [filepath]
+  (.mkdirs (path->file filepath)))
+
 (defn list-files
   [file]
   (seq (.listFiles file)))
@@ -51,6 +55,13 @@
   (->> (iterate-file-tree file-or-path)
        (filter known-ext?)))
 
+(defn write-str
+  "Writes string to file. Closes any open readers.
+  returns the string"
+  [string filepath]
+  (with-open [writer (clojure.java.io/writer filepath)]
+    (.write writer string)))
+
 (defn read-file
   "Takes either a File or file path as argument and returns a string
   with the contents of the file."
@@ -62,5 +73,18 @@
         (clojure.string/join "\n" result)
         (recur (.readLine reader)
                (conj result line))))))
+
+(defn get-output-dir
+  [root package-name]
+  (let [root-dir (if (= (last root) \/)
+                   root
+                   (str root "/"))]
+    (str root-dir (.replace package-name "." "/") "/")))
+
+(defn get-output-location
+  "Given a package and class name as argument returns the location where the file
+  should be written to"
+  [root package-name class-name]
+  (str (get-output-dir root package-name) class-name ".java"))
 
 
