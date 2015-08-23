@@ -1,94 +1,35 @@
 (ns typewriter.core
-  (:require [clojure.string :as s]
-            [typewriter.template :refer :all]
-            [typewriter.util :as util]
-            [typewriter.equals :refer [write-equals write-hashcode]]))
+  (:require [typewriter.writer :refer [write-type]]
+            [typewriter.file :refer [find-typewriter-programs
+                                     read-file
+                                     get-extension
+                                     get-output-location
+                                     mkdirs
+                                     get-output-dir
+                                     write-str]]
+            [typewriter.json :as json]))
 
-(defn- or-modifier
-  [field modifier]
-  (if (nil? field)
-    modifier
-    field))
+(defn parse-file
+  [file]
+  (let [ext (get-extension file)]
+    (if (not= "json" ext)
+      (throw (new IllegalArgumentException (str "Don't know how to parse " file)))
+      (->> (read-file file)
+           (json/parse)))))
 
-(defn- or-private
-  [field]
-  (or-modifier field "private"))
-
-(defn write-imports
-  [imports]
-  ($>> #(str "import " % ";") imports "\n"))
-
-(defn write-package
-  [package-name]
-  (str "package " package-name "\n"))
-
-(defn write-doc
-  [doc]
-  (let [lines (s/split-lines doc)]
-    (str "/**\n"
-         (s/join "\n" (map #(str " * " %) lines))
-        "\n */\n")))
-
-(defn write-field
-  [{name :name
-    type :type
-    doc :doc
-    modifier :modifier}]
-  (str (write-doc doc)
-       (or-private modifier) " " type " " name ";\n\n"))
-
-(defn write-getter
-  [{name :name
-    type :type
-    doc :doc
-    modifier :modifier}]
-  (str (write-doc (str "A getter for the {@link #" name "} field"))
-       "public " type " " (util/attr-to-getter-name name) "() {\n"
-       "  return this." name ";\n"
-       "}\n"))
-
-(defn write-class
-  [modifier {class-name :class-name
-             doc :doc
-             attrs :attrs}]
-  (str (write-doc doc)
-       modifier" class "class-name" {\n"
-       "\n"
-       ($>> write-field attrs "" 4)
-       "\n\n"
-       ($>> write-getter attrs "\n" 4)
-       "\n\n"
-       (->> (write-equals class-name attrs)
-            (util/indent 4))
-       "\n\n"
-       (->> (write-hashcode attrs)
-            (util/indent 4))
-       "\n\n"
-       "}\n"))
-
-(defn type-writer
-  [typedef]
-  (str (write-package (:package-name typedef))
-       "\n"
-       (write-imports (:imports typedef))
-       "\n"
-       (write-class "public" typedef)))
-
-(def x
-  {:class-name "User"
-   :package-name "com.fernandohur"
-   :imports ["java.lang.String"]
-   :doc "this is the class' javadoc"
-   :attrs [{:name "firstName"
-            :type "String"
-            :doc "This is the user's name"}
-           {:name "age"
-            :type "int"
-            :doc  "The users age measured in years"}
-           {:name "isHappy"
-            :type "boolean"
-            :doc  "flag indicating wether this user is happy or not"
-            :modifier "protected"}]})
+(defn compile-tree
+  [root output]
+  (println "Searching for files in" root)
+  (for [file (find-typewriter-programs root)]
+    (let [parsed (parse-file file)
+          compiled (write-type parsed)
+          out-dir (get-output-dir output (:package-name parsed))
+          out (get-output-location output
+                                   (:package-name parsed)
+                                   (:class-name parsed))]
+      (println "Writing" out)
+      (mkdirs out-dir)
+      (write-str compiled out))))
 
 
-(print (type-writer x))
+
